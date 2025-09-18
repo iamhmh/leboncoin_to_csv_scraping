@@ -294,7 +294,7 @@ class LeboncoinBureauScraper:
         
         if not filename:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"leboncoin_bureaux_commerces_{timestamp}.csv"
+            filename = f"leboncoin_bureaux_commerces_{self.city}_{timestamp}.csv"
         
         # Ajouter le chemin du dossier exports
         if not filename.startswith(exports_dir):
