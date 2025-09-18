@@ -1,0 +1,9 @@
+README.md
+leboncoin_scraper.py
+setup.py
+leboncoin_bureaux_scraper.egg-info/PKG-INFO
+leboncoin_bureaux_scraper.egg-info/SOURCES.txt
+leboncoin_bureaux_scraper.egg-info/dependency_links.txt
+leboncoin_bureaux_scraper.egg-info/entry_points.txt
+leboncoin_bureaux_scraper.egg-info/requires.txt
+leboncoin_bureaux_scraper.egg-info/top_level.txt

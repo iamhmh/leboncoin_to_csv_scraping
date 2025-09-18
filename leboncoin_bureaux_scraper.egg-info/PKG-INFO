@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: leboncoin-bureaux-scraper
+Version: 0.1.0
+Summary: Scraper Leboncoin pour Bureaux et Commerces
+Author: 
+Requires-Dist: lbc>=1.0.9
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: python-dateutil>=2.8.0
+Dynamic: requires-dist
+Dynamic: summary

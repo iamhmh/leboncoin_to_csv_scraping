@@ -1,0 +1,2 @@
+[console_scripts]
+lbc-scrape = leboncoin_scraper:main

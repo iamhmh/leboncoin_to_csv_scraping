@@ -1,0 +1,53 @@
+# Environnement Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Fichiers de données générés
+*.csv
+*.xlsx
+*.json
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Fichiers de test temporaires
+test_*.csv
+temp_*.csv
+example_*.csv
+
+# Configuration locale
+config.ini
+.env
+
+# Documentation générée
+docs/_build/
+
+# Dossiers de sauvegarde
+backup/
+old/
