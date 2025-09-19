@@ -15,8 +15,6 @@ import json
 import time
 import logging
 
-# Configuration du logging
-# S'assurer que le dossier des logs existe
 os.makedirs('logs', exist_ok=True)
 
 logging.basicConfig(
@@ -40,9 +38,18 @@ class LeboncoinBureauScraper:
         Initialise le scraper
         
         Args:
-            proxy: Configuration proxy optionnelle
+            proxy: Configuration proxy optionnelle (str ou lbc.Proxy)
             delay_between_requests: Délai en secondes entre les requêtes
         """
+        if proxy and isinstance(proxy, str):
+            import re
+            match = re.match(r'^http[s]?://(?:[^:@]+?:[^:@]+?@)?([^:/]+):(\d+)', proxy)
+            if match:
+                host = match.group(1)
+                port = int(match.group(2))
+                proxy = lbc.Proxy(host, port)
+            else:
+                raise ValueError(f"Format de proxy non reconnu : {proxy}")
         self.client = lbc.Client(proxy=proxy)
         self.delay = delay_between_requests
         self.scraped_data = []
@@ -89,7 +96,6 @@ class LeboncoinBureauScraper:
             while page <= max_pages:
                 logger.info(f"Scraping page {page}/{max_pages}")
                 
-                # Préparation des paramètres de recherche
                 search_params = {
                     'text': text,
                     'category': lbc.Category.IMMOBILIER_BUREAUX_ET_COMMERCES,
@@ -102,16 +108,13 @@ class LeboncoinBureauScraper:
                     'search_in_title_only': search_in_title_only
                 }
                 
-                # Ajout des filtres de prix et surface
                 if price_range:
                     search_params['price'] = price_range
                 if surface_range:
                     search_params['square'] = surface_range
                 
-                # Ajout des autres filtres
                 search_params.update(kwargs)
                 
-                # Exécution de la recherche
                 result = self.client.search(**search_params)
                 
                 if not result.ads:
@@ -120,19 +123,16 @@ class LeboncoinBureauScraper:
                 
                 logger.info(f"Trouvé {len(result.ads)} annonces à la page {page}")
                 
-                # Traitement des annonces
                 for ad in result.ads:
                     ad_data = self._process_ad(ad)
                     all_ads.append(ad_data)
                 
-                # Vérification si c'est la dernière page
                 if page >= result.max_pages:
                     logger.info(f"Dernière page atteinte ({result.max_pages})")
                     break
                 
                 page += 1
                 
-                # Délai entre les requêtes pour éviter le rate limiting
                 if self.delay > 0:
                     time.sleep(self.delay)
                     
@@ -155,7 +155,6 @@ class LeboncoinBureauScraper:
             Dictionnaire avec les données de l'annonce
         """
         try:
-            # Extraction des attributs spécifiques
             attributes = {}
             for attr in ad.attributes:
                 if attr.key and attr.value:
@@ -164,7 +163,6 @@ class LeboncoinBureauScraper:
                         'label': attr.value_label if attr.value_label else attr.value
                     }
             
-            # Construction des données de base
             ad_data = {
                 'id': ad.id,
                 'title': ad.subject,
@@ -208,7 +206,6 @@ class LeboncoinBureauScraper:
                 'scraped_at': datetime.now().isoformat()
             }
             
-            # Informations professionnelles si disponibles
             if ad.user and hasattr(ad.user, 'pro') and ad.user.pro:
                 pro = ad.user.pro
                 ad_data.update({
@@ -232,7 +229,6 @@ class LeboncoinBureauScraper:
             if key in attributes:
                 try:
                     value = attributes[key]['value']
-                    # Extraction du nombre de la chaîne
                     import re
                     match = re.search(r'\d+', str(value))
                     if match:
@@ -273,7 +269,7 @@ class LeboncoinBureauScraper:
                 return attributes[key]['label']
         return ''
     
-    def save_to_csv(self, filename: str = None, include_raw_attributes: bool = False) -> str:
+    def save_to_csv(self, filename: str = None, city: str = None, include_raw_attributes: bool = False) -> str:
         """
         Sauvegarde les données en CSV
         
@@ -287,20 +283,18 @@ class LeboncoinBureauScraper:
         if not self.scraped_data:
             raise ValueError("Aucune donnée à sauvegarder. Exécutez d'abord une recherche.")
         
-        # Créer le dossier exports s'il n'existe pas
-        exports_dir = "exports"
-        if not os.path.exists(exports_dir):
-            os.makedirs(exports_dir)
+        data_dir = "data"
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
         
         if not filename:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"leboncoin_bureaux_commerces_{self.city}_{timestamp}.csv"
+            city_part = city if city else "all"
+            filename = f"leboncoin_bureaux_commerces_{city_part}_{timestamp}.csv"
         
-        # Ajouter le chemin du dossier exports
-        if not filename.startswith(exports_dir):
-            filename = os.path.join(exports_dir, filename)
+        if not filename.startswith(data_dir):
+            filename = os.path.join(data_dir, filename)
         
-        # Préparation des données pour le CSV
         csv_data = []
         for ad in self.scraped_data:
             if 'error' in ad:
@@ -308,16 +302,13 @@ class LeboncoinBureauScraper:
             
             csv_row = ad.copy()
             
-            # Suppression des attributs bruts si non demandés
             if not include_raw_attributes:
                 csv_row.pop('raw_attributes', None)
             
             csv_data.append(csv_row)
         
-        # Création du DataFrame
         df = pd.DataFrame(csv_data)
         
-        # Sauvegarde
         df.to_csv(filename, index=False, encoding='utf-8')
         logger.info(f"Données sauvegardées dans {filename} ({len(csv_data)} annonces)")
         
@@ -366,13 +357,13 @@ def main():
     parser.add_argument('--max-surface', type=int, help='Surface maximum')
     parser.add_argument('--max-pages', type=int, default=5, help='Nombre maximum de pages à scraper')
     parser.add_argument('--output', type=str, help='Nom du fichier de sortie CSV')
-    parser.add_argument('--delay', type=float, default=1.0, help='Délai entre les requêtes')
+    parser.add_argument('--delay', type=float, default=3.0, help='Délai entre les requêtes')
     parser.add_argument('--owner-type', choices=['pro', 'private', 'all'], default='all', help='Type de vendeur')
     parser.add_argument('--stats', action='store_true', help='Afficher les statistiques')
+    parser.add_argument('--proxy', type=str, help='Proxy HTTP/HTTPS (ex: http://user:pass@host:port)', default=None)
     
     args = parser.parse_args()
     
-    # Configuration de la localisation
     locations = []
     if args.city and args.lat and args.lng:
         location = lbc.City(
@@ -383,7 +374,6 @@ def main():
         )
         locations = [location]
     
-    # Configuration des fourchettes de prix et surface
     price_range = None
     if args.min_price and args.max_price:
         price_range = [args.min_price, args.max_price]
@@ -392,7 +382,6 @@ def main():
     if args.min_surface and args.max_surface:
         surface_range = [args.min_surface, args.max_surface]
     
-    # Configuration du type de vendeur
     owner_type_map = {
         'pro': lbc.OwnerType.PRO,
         'private': lbc.OwnerType.PRIVATE,
@@ -400,8 +389,7 @@ def main():
     }
     owner_type = owner_type_map[args.owner_type]
     
-    # Initialisation et exécution du scraper
-    scraper = LeboncoinBureauScraper(delay_between_requests=args.delay)
+    scraper = LeboncoinBureauScraper(delay_between_requests=args.delay, proxy=args.proxy)
     
     try:
         ads = scraper.search_bureaux_commerces(
@@ -414,11 +402,9 @@ def main():
         )
         
         if ads:
-            # Sauvegarde
-            filename = scraper.save_to_csv(args.output)
+            filename = scraper.save_to_csv(args.output, city=args.city)
             print(f"Données sauvegardées dans: {filename}")
             
-            # Affichage des statistiques si demandé
             if args.stats:
                 stats = scraper.get_statistics()
                 print("\n=== STATISTIQUES ===")

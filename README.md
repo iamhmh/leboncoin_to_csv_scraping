@@ -1,14 +1,14 @@
-# Leboncoin Scraper - Bureaux et commerces
+# Leboncoin Scraper (Bureaux et commerces)
 
 Un scraper en ligne de commande pour extraire les annonces de "Bureaux et commerces" sur Leboncoin, basé sur la bibliothèque [lbc](https://github.com/etienne-hd/lbc).
 
 ## ✨ Points clés
 - Une seule commande à exécuter: `lbc-scrape`
-- Export CSV automatique dans `exports/`
+- Export CSV automatique dans `data/`
 - Logs propres dans `logs/scraper.log`
 - Options simples en CLI (+ API Python optionnelle)
 
-## � Installation rapide
+## 🚀 Installation rapide
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -30,7 +30,7 @@ lbc-scrape --text "local commercial" --city "Lyon" --lat 45.7640 --lng 4.8357 \
 lbc-scrape --text "commerce" --city "Marseille" --lat 43.2965 --lng 5.3698 \
     --owner-type pro --stats --output "marseille_pro.csv"
 ```
-Tous les CSV sont automatiquement enregistrés dans `exports/`.
+Tous les CSV sont automatiquement enregistrés dans `data/`.
 
 ## � Options principales
 | Argument | Description | Exemple |
@@ -44,7 +44,7 @@ Tous les CSV sont automatiquement enregistrés dans `exports/`.
 | `--max-pages` | Pages max | `--max-pages 10` |
 | `--owner-type` | Vendeur (`pro`, `private`, `all`) | `--owner-type pro` |
 | `--delay` | Délai entre requêtes (s) | `--delay 2.0` |
-| `--output` | Nom du CSV (dans `exports/`) | `--output "resultats.csv"` |
+| `--output` | Nom du CSV (dans `data/`) | `--output "resultats.csv"` |
 | `--stats` | Afficher les stats | `--stats` |
 
 ## 🧪 API Python (optionnel)
@@ -55,7 +55,7 @@ import lbc
 scraper = LeboncoinBureauScraper(delay_between_requests=1.0)
 paris = lbc.City(lat=48.8566, lng=2.3522, radius=15000, city="Paris")
 ads = scraper.search_bureaux_commerces(text="bureau", locations=[paris], max_pages=3)
-filename = scraper.save_to_csv("bureaux_paris.csv")  # => exports/bureaux_paris.csv
+filename = scraper.save_to_csv("bureaux_paris.csv")  # => data/bureaux_paris.csv
 print(filename)
 ```
 
@@ -63,7 +63,7 @@ print(filename)
 ```bash
 python clean.py
 ```
-Déplace les CSV racine vers `exports/`, range les logs dans `logs/`, et nettoie quelques fichiers temporaires.
+Déplace les CSV racine vers `data/`, range les logs dans `logs/`, et nettoie quelques fichiers temporaires.
 
 ## 🐛 Dépannage
 - Activez votre venv: `source .venv/bin/activate`
