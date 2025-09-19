@@ -32,7 +32,7 @@ lbc-scrape --text "commerce" --city "Marseille" --lat 43.2965 --lng 5.3698 \
 ```
 Tous les CSV sont automatiquement enregistrés dans `data/`.
 
-## � Options principales
+## 🛠️ Options principales
 | Argument | Description | Exemple |
 |----------|-------------|---------|
 | `--text` | Terme de recherche | `--text "bureau"` |
@@ -59,17 +59,14 @@ filename = scraper.save_to_csv("bureaux_paris.csv")  # => data/bureaux_paris.csv
 print(filename)
 ```
 
-## 🧹 Nettoyage (optionnel)
-```bash
-python clean.py
-```
-Déplace les CSV racine vers `data/`, range les logs dans `logs/`, et nettoie quelques fichiers temporaires.
-
 ## 🐛 Dépannage
 - Activez votre venv: `source .venv/bin/activate`
 - Réinstallez: `pip install -r requirements.txt`
 - Consultez les logs: `logs/scraper.log`
 - Réduisez `--max-pages` ou augmentez `--delay` si nécessaire
 
-## ⚖️ Licence et respect
+## ⚖️ Respect et conditions
 Projet non affilié à Leboncoin. Respectez leurs conditions d’utilisation.
+
+## Licence 
+Ce projet est sous licence MIT License.
